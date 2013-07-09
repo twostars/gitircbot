@@ -97,23 +97,30 @@ namespace GitIrcBot
             this.ChatCommandProcessors.Add("issue.new", ProcessChatCommandNewIssue);
             this.ChatCommandProcessors.Add("issue.create", ProcessChatCommandNewIssue);
             this.ChatCommandProcessors.Add("newissue", ProcessChatCommandNewIssue);
+            this.ChatCommandProcessors.Add("new", ProcessChatCommandNewIssue);
             this.ChatCommandProcessors.Add("createissue", ProcessChatCommandNewIssue);
+            this.ChatCommandProcessors.Add("create", ProcessChatCommandNewIssue);
 
             this.ChatCommandProcessors.Add("issue.search", ProcessChatCommandSearchIssue);
             this.ChatCommandProcessors.Add("issue.find", ProcessChatCommandSearchIssue);
             this.ChatCommandProcessors.Add("searchissue", ProcessChatCommandSearchIssue);
             this.ChatCommandProcessors.Add("searchissues", ProcessChatCommandSearchIssue);
+            this.ChatCommandProcessors.Add("search", ProcessChatCommandSearchIssue);
             this.ChatCommandProcessors.Add("issuesearch", ProcessChatCommandSearchIssue);
             this.ChatCommandProcessors.Add("findissue", ProcessChatCommandSearchIssue);
+            this.ChatCommandProcessors.Add("find", ProcessChatCommandSearchIssue);
 
             this.ChatCommandProcessors.Add("issue.close", ProcessChatCommandCloseIssue);
             this.ChatCommandProcessors.Add("closeissue", ProcessChatCommandCloseIssue);
+            this.ChatCommandProcessors.Add("close", ProcessChatCommandCloseIssue);
 
             this.ChatCommandProcessors.Add("issue.reopen", ProcessChatCommandReopenIssue);
             this.ChatCommandProcessors.Add("reopenissue", ProcessChatCommandReopenIssue);
+            this.ChatCommandProcessors.Add("reopen", ProcessChatCommandReopenIssue);
 
             this.ChatCommandProcessors.Add("command.add", ProcessChatCommandAddComment);
             this.ChatCommandProcessors.Add("addcomment", ProcessChatCommandAddComment);
+            this.ChatCommandProcessors.Add("add", ProcessChatCommandAddComment);
 
             this.ChatCommandProcessors.Add("command.last", ProcessChatCommandLastComment);
             this.ChatCommandProcessors.Add("lastcomment", ProcessChatCommandLastComment);
