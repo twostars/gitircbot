@@ -15,7 +15,7 @@ namespace GitIrcBot.Github
 {
     class GithubWrapper
     {
-        private const int PerPageLimit = 1000;
+        private const int PerPageLimit = 100;
 
         private IRequestProxy _requestProxy;
         private AuthenticatedIssuesRepository _issueRepository;
@@ -135,6 +135,53 @@ namespace GitIrcBot.Github
             return null;
         }
 
+        public IssueSearchResult[] SearchIssues(string search)
+        {
+            try
+            {
+                // Attempt to search for open issues first. 
+                var searchResults = _issueRepository.Search(_repositoryName, _ownerName, IssueState.Open, search);
+                if (searchResults.Length > 0)
+                    return searchResults;
+
+                // If nothing's found, try closed issues.
+                return _issueRepository.Search(_repositoryName, _ownerName, IssueState.Closed, search);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public IssueResponse ReopenIssue(int issueNo)
+        {
+            try
+            {
+                return _issueRepository.ReOpen(_repositoryName, _ownerName, issueNo);
+            }
+            catch (WebException ex)
+            {
+                ConvertThrown404(ex);
+            }
+
+            return null;
+        }
+
+        public IssueResponse CloseIssue(int issueNo)
+        {
+            try
+            {
+                return _issueRepository.Close(_repositoryName, _ownerName, issueNo);
+            }
+            catch (WebException ex)
+            {
+                ConvertThrown404(ex);
+            }
+
+            return null;
+        }
+
+
         private void ConvertThrown404(WebException ex)
         {
             // Convert 404s into IssueNotFoundExceptions to make handling easier.
@@ -171,7 +218,17 @@ namespace GitIrcBot.Github
 
         public string GetIssueUrl(GithubIssue issue)
         {
-            return GetShortenedUrl(issue.Issue.HtmlUrl);
+            return GetIssueUrl(issue.Issue);
+        }
+
+        public string GetIssueUrl(IssueResponse issue)
+        {
+            return GetShortenedUrl(issue.HtmlUrl);
+        }
+
+        public string GetIssueUrl(IssueSearchResult issue)
+        {
+            return GetShortenedUrl(issue.HtmlUrl);
         }
 
         public string GetCommentUrl(IssueComment comment)

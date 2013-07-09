@@ -99,6 +99,19 @@ namespace GitIrcBot
             this.ChatCommandProcessors.Add("newissue", ProcessChatCommandNewIssue);
             this.ChatCommandProcessors.Add("createissue", ProcessChatCommandNewIssue);
 
+            this.ChatCommandProcessors.Add("issue.search", ProcessChatCommandSearchIssue);
+            this.ChatCommandProcessors.Add("issue.find", ProcessChatCommandSearchIssue);
+            this.ChatCommandProcessors.Add("searchissue", ProcessChatCommandSearchIssue);
+            this.ChatCommandProcessors.Add("searchissues", ProcessChatCommandSearchIssue);
+            this.ChatCommandProcessors.Add("issuesearch", ProcessChatCommandSearchIssue);
+            this.ChatCommandProcessors.Add("findissue", ProcessChatCommandSearchIssue);
+
+            this.ChatCommandProcessors.Add("issue.close", ProcessChatCommandCloseIssue);
+            this.ChatCommandProcessors.Add("closeissue", ProcessChatCommandCloseIssue);
+
+            this.ChatCommandProcessors.Add("issue.reopen", ProcessChatCommandReopenIssue);
+            this.ChatCommandProcessors.Add("reopenissue", ProcessChatCommandReopenIssue);
+
             this.ChatCommandProcessors.Add("command.add", ProcessChatCommandAddComment);
             this.ChatCommandProcessors.Add("addcomment", ProcessChatCommandAddComment);
 
@@ -162,12 +175,166 @@ namespace GitIrcBot
             try
             {
                 var issue = _github.CreateIssue(issueTitle, issueBody);
-                client.LocalUser.SendMessage(replyTarget, "{0}: Issue #{1} created. {2}", 
+                client.LocalUser.SendMessage(replyTarget, "{0}: Issue #{1} created. {2}",
                     channelUser.User.NickName, issue.Issue.Number, _github.GetIssueUrl(issue));
             }
             catch (Exception ex)
             {
                 client.LocalUser.SendMessage(replyTarget, "{0}: Failed to create issue - {1}",
+                    channelUser.User.NickName, ex.Message);
+            }
+        }
+
+        private void ProcessChatCommandCloseIssue(IrcClient client, IIrcMessageSource source,
+            IList<IIrcMessageTarget> targets, string command, IList<string> parameters)
+        {
+            if (targets.Count == 0)
+                return;
+
+            var channel = targets[0];
+            if (!(channel is IrcChannel))
+                return;
+
+            var channelUser = (channel as IrcChannel).GetChannelUser(source as IrcUser);
+            var replyTarget = GetDefaultReplyTarget(client, source, targets);
+
+            if (!channelUser.Modes.Contains('o'))
+            {
+                client.LocalUser.SendMessage(replyTarget, "{0}: you do not have permission to use this feature.", channelUser.User.NickName);
+                return;
+            }
+
+            if (parameters.Count == 0)
+            {
+                client.LocalUser.SendMessage(replyTarget, "{0}: not enough arguments supplied. Example: !closeissue 277", channelUser.User.NickName);
+                return;
+            }
+
+            int issueNo = 0;
+            try
+            {
+                if (!int.TryParse(parameters[0], out issueNo))
+                {
+                    client.LocalUser.SendMessage(replyTarget, "{0}: invalid issue number supplied (#{1}).", channelUser.User.NickName, issueNo);
+                    return;
+                }
+
+                var issue = _github.CloseIssue(issueNo);
+                client.LocalUser.SendMessage(replyTarget, "{0}: Issue #{1} ({2}) closed. {3}",
+                    channelUser.User.NickName, issue.Number, issue.Title, _github.GetIssueUrl(issue));
+            }
+            catch (IssueNotFoundException)
+            {
+                client.LocalUser.SendMessage(replyTarget, "{0}: Issue #{1} not found.",
+                    channelUser.User.NickName, issueNo);
+            }
+            catch (Exception ex)
+            {
+                client.LocalUser.SendMessage(replyTarget, "{0}: Failed to close issue - {1}",
+                    channelUser.User.NickName, ex.Message);
+            }
+        }
+
+        private void ProcessChatCommandReopenIssue(IrcClient client, IIrcMessageSource source,
+            IList<IIrcMessageTarget> targets, string command, IList<string> parameters)
+        {
+            if (targets.Count == 0)
+                return;
+
+            var channel = targets[0];
+            if (!(channel is IrcChannel))
+                return;
+
+            var channelUser = (channel as IrcChannel).GetChannelUser(source as IrcUser);
+            var replyTarget = GetDefaultReplyTarget(client, source, targets);
+
+            if (!channelUser.Modes.Contains('o'))
+            {
+                client.LocalUser.SendMessage(replyTarget, "{0}: you do not have permission to use this feature.", channelUser.User.NickName);
+                return;
+            }
+
+            if (parameters.Count == 0)
+            {
+                client.LocalUser.SendMessage(replyTarget, "{0}: not enough arguments supplied. Example: !closeissue 277", channelUser.User.NickName);
+                return;
+            }
+
+            int issueNo = 0;
+            try
+            {
+                if (!int.TryParse(parameters[0], out issueNo))
+                {
+                    client.LocalUser.SendMessage(replyTarget, "{0}: invalid issue number supplied (#{1}).", channelUser.User.NickName, issueNo);
+                    return;
+                }
+
+                var issue = _github.ReopenIssue(issueNo);
+                client.LocalUser.SendMessage(replyTarget, "{0}: Issue #{1} ({2}) reopened. {3}",
+                    channelUser.User.NickName, issue.Number, issue.Title, _github.GetIssueUrl(issue));
+            }
+            catch (IssueNotFoundException)
+            {
+                client.LocalUser.SendMessage(replyTarget, "{0}: Issue #{1} not found.",
+                    channelUser.User.NickName, issueNo);
+            }
+            catch (Exception ex)
+            {
+                client.LocalUser.SendMessage(replyTarget, "{0}: Failed to reopen issue - {1}",
+                    channelUser.User.NickName, ex.Message);
+            }
+        }
+
+        private void ProcessChatCommandSearchIssue(IrcClient client, IIrcMessageSource source,
+            IList<IIrcMessageTarget> targets, string command, IList<string> parameters)
+        {
+            if (targets.Count == 0)
+                return;
+
+            var channel = targets[0];
+            if (!(channel is IrcChannel))
+                return;
+
+            var channelUser = (channel as IrcChannel).GetChannelUser(source as IrcUser);
+            var replyTarget = GetDefaultReplyTarget(client, source, targets);
+
+            if (!channelUser.Modes.Contains('o')
+                && !channelUser.Modes.Contains('v'))
+            {
+                client.LocalUser.SendMessage(replyTarget, "{0}: you do not have permission to use this feature.", channelUser.User.NickName);
+                return;
+            }
+
+            if (parameters.Count == 0)
+            {
+                client.LocalUser.SendMessage(replyTarget, "{0}: not enough arguments supplied. Example: !searchissue search terms", channelUser.User.NickName);
+                return;
+            }
+
+            var searchTerms = string.Join(" ", parameters);
+            try
+            {
+                var searchResults = _github.SearchIssues(searchTerms);
+                if (searchResults.Length == 0)
+                {
+                    client.LocalUser.SendMessage(replyTarget, "{0}: No issues were found using that search criteria.", channelUser.User.NickName);
+                    return;
+                }
+
+                const int searchLimit = 3;
+                int n = 0;
+                foreach (var result in searchResults)
+                {
+                    client.LocalUser.SendMessage(replyTarget, "{0}: [{1}] Issue #{2} - {3} - {4}",
+                        channelUser.User.NickName, result.State, result.Number, result.Title, _github.GetIssueUrl(result));
+
+                    if (++n >= searchLimit)
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                client.LocalUser.SendMessage(replyTarget, "{0}: Failed to perform search - {1}",
                     channelUser.User.NickName, ex.Message);
             }
         }
