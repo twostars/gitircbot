@@ -1,0 +1,10 @@
+[submodule "ircdotnet"]
+	path = ircdotnet
+	url = https://github.com/twostars/ircdotnet.git
+[submodule "GithubSharp"]
+	path = GithubSharp
+	url = https://github.com/twostars/GithubSharp.git
+
+[submodule "GooGlSharp"]
+	path = GooGlSharp
+	url = https://github.com/twostars/GooGlSharp.git
