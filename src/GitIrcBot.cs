@@ -35,12 +35,16 @@ namespace GitIrcBot
 
         public override void Run()
         {
+            _Connect();
+            base.Run();
+        }
+
+        private void _Connect()
+        {
             if (!String.IsNullOrEmpty(Settings.Default.Server))
                 Connect(Settings.Default.Server, RegistrationInfo);
             else
                 Console.WriteLine(Resources.MessageServerNotSupplied);
-
-            base.Run();
         }
 
         #region Event notifications
@@ -54,9 +58,18 @@ namespace GitIrcBot
             }
         }
 
+        protected override void OnClientDisconnect(IrcClient client) 
+        {
+            Console.WriteLine("OnClientDisconnect");
+        }
+
         protected override void OnChannelMessageReceived(IrcChannel channel, IrcMessageEventArgs e)
         {
-            var t = Task.Factory.StartNew(() =>
+            // Ignore commands (valid or not)
+            if (e.Text.StartsWith(ChatCommandPrefix))
+                return;
+
+            Task.Factory.StartNew(() =>
             {
                 // Scan for issue numbers.
                 var regex = new Regex(@"#(\d+)");
@@ -96,7 +109,9 @@ namespace GitIrcBot
 
             this.ChatCommandProcessors.Add("issue.new", ProcessChatCommandNewIssue);
             this.ChatCommandProcessors.Add("issue.create", ProcessChatCommandNewIssue);
+            this.ChatCommandProcessors.Add("issue.add", ProcessChatCommandNewIssue);
             this.ChatCommandProcessors.Add("newissue", ProcessChatCommandNewIssue);
+            this.ChatCommandProcessors.Add("addissue", ProcessChatCommandNewIssue);
             this.ChatCommandProcessors.Add("new", ProcessChatCommandNewIssue);
             this.ChatCommandProcessors.Add("createissue", ProcessChatCommandNewIssue);
             this.ChatCommandProcessors.Add("create", ProcessChatCommandNewIssue);
